@@ -1,0 +1,15 @@
+client-secret: client_secret.json
+token-output: token.json
+scopes-file: scopes.txt
+
+# Scopes from this list are merged with scopes-file and duplicates are removed.
+scopes:
+  - openid
+  - https://www.googleapis.com/auth/userinfo.email
+
+# This exact URI must be registered for the OAuth client in Google Cloud.
+redirect-url: http://localhost:8080/callback
+listen-address: 127.0.0.1:8080
+open-browser: true
+force-consent: true
+timeout: 5m

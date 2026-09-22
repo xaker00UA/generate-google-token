@@ -1,0 +1,104 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - run: go test -race ./...
+      - run: go vet ./...
+      - uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.13
+
+  build:
+    name: Build ${{ matrix.goos }}/${{ matrix.goarch }}
+    needs: validate
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            archive: tar.gz
+          - goos: linux
+            goarch: arm64
+            archive: tar.gz
+          - goos: darwin
+            goarch: amd64
+            archive: tar.gz
+          - goos: darwin
+            goarch: arm64
+            archive: tar.gz
+          - goos: windows
+            goarch: amd64
+            archive: zip
+            extension: .exe
+          - goos: windows
+            goarch: arm64
+            archive: zip
+            extension: .exe
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: "0"
+        run: |
+          mkdir -p package
+          go build -trimpath \
+            -ldflags "-s -w -X generate-google-cred/cmd.version=${GITHUB_REF_NAME}" \
+            -o "package/generate-google-cred${{ matrix.extension }}" .
+      - name: Create archive
+        env:
+          ARCHIVE_NAME: generate-google-cred_${{ github.ref_name }}_${{ matrix.goos }}_${{ matrix.goarch }}
+        run: |
+          mkdir -p dist
+          if [[ "${{ matrix.archive }}" == "zip" ]]; then
+            (cd package && zip "../dist/${ARCHIVE_NAME}.zip" "generate-google-cred${{ matrix.extension }}")
+          else
+            tar -C package -czf "dist/${ARCHIVE_NAME}.tar.gz" "generate-google-cred${{ matrix.extension }}"
+          fi
+      - uses: actions/upload-artifact@v7
+        with:
+          name: generate-google-cred-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/*
+          if-no-files-found: error
+
+  publish:
+    name: Publish GitHub release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Create checksums
+        run: cd dist && sha256sum * > checksums.txt
+      - name: Create release and upload binaries
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release create "${GITHUB_REF_NAME}" dist/* --verify-tag --generate-notes --title "${GITHUB_REF_NAME}"

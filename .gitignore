@@ -1,0 +1,13 @@
+# OAuth credentials and generated tokens
+client_secret*.json
+token*.json
+
+# Local configuration (use config.example.yaml as a template)
+config.yaml
+
+# Build and editor artifacts
+dist/
+generate-google-cred
+generate-google-cred.exe
+.DS_Store
+.idea/

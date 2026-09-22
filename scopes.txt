@@ -1,0 +1,11 @@
+# Доступ к таблицам
+https://www.googleapis.com/auth/spreadsheets
+
+// Доступ к диску (полный и только к файлам приложения)
+https://www.googleapis.com/auth/drive
+https://www.googleapis.com/auth/drive.file
+
+//Oauth
+https://www.googleapis.com/auth/userinfo.email
+https://www.googleapis.com/auth/userinfo.profile
+openid
