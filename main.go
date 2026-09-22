@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"generate-google-cred/cmd"
+	"github.com/xaker00UA/generate-google-token/cmd"
 )
 
 func main() {

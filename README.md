@@ -2,13 +2,18 @@
 
 CLI на Go для интерактивного получения пользовательского Google OAuth 2.0 token-файла. Командная строка построена на Cobra, конфигурация загружается через Viper. Параметры можно передавать флагами, переменными окружения или YAML-файлом.
 
-## Подготовка Google OAuth
+## Где получить `client_secret.json`
 
-1. В Google Cloud Console создайте OAuth client ID типа **Web application**.
-2. Добавьте точный redirect URI `http://localhost:8080/callback` (или URI из вашей конфигурации).
-3. Скачайте JSON клиента и сохраните локально как `client_secret.json`.
-4. Настройте scopes в `scopes.txt`, YAML-конфиге или флагах `--scope`.
+1. Откройте [Google Cloud Console](https://console.cloud.google.com/) и выберите существующий проект или [создайте новый](https://console.cloud.google.com/projectcreate).
+2. В [API Library](https://console.cloud.google.com/apis/library) включите API, к которым нужен доступ. Для стандартного `scopes.txt` понадобятся [Google Drive API](https://console.cloud.google.com/apis/library/drive.googleapis.com) и [Google Sheets API](https://console.cloud.google.com/apis/library/sheets.googleapis.com).
+3. В разделе Google Auth Platform заполните [Branding](https://console.cloud.google.com/auth/branding): название приложения, email поддержки и контактный email.
+4. В разделе [Audience](https://console.cloud.google.com/auth/audience) выберите тип пользователей. Для личного использования можно оставить статус **Testing** и добавить свой Google-аккаунт в список test users.
+5. Откройте [Clients](https://console.cloud.google.com/auth/clients), нажмите **Create client** и выберите тип **Web application**.
+6. В **Authorized redirect URIs** добавьте точное значение `http://localhost:8080/callback`. Если в конфигурации CLI используется другой адрес, port или path, зарегистрируйте именно его.
+7. Нажмите **Create**, скачайте JSON клиента и сохраните его рядом с бинарником под именем `client_secret.json`. Также можно указать другое расположение через `--client-secret` или `client-secret` в YAML.
+8. Настройте scopes в `scopes.txt`, YAML-конфиге или флагах `--scope`.
 
+Подробная официальная инструкция: [Using OAuth 2.0 for Web Server Applications](https://developers.google.com/identity/protocols/oauth2/web-server#creatingcred). Если приложение находится в режиме **Testing** и запрашивает Drive/Sheets scopes, выданный refresh token может истечь через семь дней. Для постоянного использования потребуется перевести приложение в **Production** и, в зависимости от scopes и аудитории, пройти проверку Google.
 
 ## Сборка
 

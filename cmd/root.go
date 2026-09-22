@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"generate-google-cred/internal/googleauth"
+	"github.com/xaker00UA/generate-google-token/internal/googleauth"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"

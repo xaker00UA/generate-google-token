@@ -1,4 +1,4 @@
-module generate-google-cred
+module github.com/xaker00UA/generate-google-token
 
 go 1.26.0
 
